@@ -14,7 +14,7 @@ services:
       - ./data:/data
     command: server /data --console-address ":9001"
     networks:
-      - proyecto1¿
+      - proyecto1
 
   jupyter:
     image: jupyter/pyspark-notebook:spark-3.4.1
@@ -24,6 +24,9 @@ services:
     volumes:
       - ./notebooks:/home/jovyan/work
       - ./notebooks:/workspace
+    command: start-notebook.sh --NotebookApp.token='${JUPYTER_TOKEN}' --NotebookApp.password=''
+    env_file:
+      - .env
     networks:
     - proyecto1
 
@@ -52,7 +55,7 @@ services:
     container_name: clickhouse
     ports:
       - "8123:8123"
-      - "9002:9002"
+      - "9002:9000"
     environment:
       CLICKHOUSE_USER: default
       CLICKHOUSE_PASSWORD: default
