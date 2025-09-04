@@ -14,7 +14,7 @@ services:
       - ./data:/data
     command: server /data --console-address ":9001"
     networks:
-      - proyecto1
+      - proyecto1¿
 
   jupyter:
     image: jupyter/pyspark-notebook:spark-3.4.1
@@ -52,7 +52,7 @@ services:
     container_name: clickhouse
     ports:
       - "8123:8123"
-      - "9000:9000"
+      - "9002:9002"
     environment:
       CLICKHOUSE_USER: default
       CLICKHOUSE_PASSWORD: default
