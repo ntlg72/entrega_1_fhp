@@ -28,7 +28,7 @@ services:
     - proyecto1
 
   nessie: 
-    image: projectnessie/nessie:0.99.0
+    image: projectnessie/nessie:latest
     container_name: nessie_catalog
     environment:
       - nessie.version.store.type=IN_MEMORY
