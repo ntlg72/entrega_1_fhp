@@ -87,10 +87,6 @@ services:
 
 volumes:
   minio-data:
-    driver_opts:
-      type: tmpfs
-      device: tmpfs
-      o: uid=1001,gid=1001,mode=770
 
 networks:
   proyecto1:
