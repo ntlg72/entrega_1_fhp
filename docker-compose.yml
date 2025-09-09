@@ -1,66 +1,105 @@
 services:
 
   minio:
-    image: minio/minio
-    container_name: minio
+    image: minio/minio:latest
+    container_name: minio_1
     ports:
       - "9000:9000"
       - "9001:9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
+    env_file:
+      - .env
     volumes:
-      - ./data:/data
+      - minio-data:/data
     command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
       - proyecto1
+    restart: unless-stopped
 
   jupyter:
-    image: jupyter/pyspark-notebook:spark-3.4.1
-    container_name: jupyter_notebook_basico
+    image: jupyter/base-notebook:latest
+    container_name: jupyter_1
     ports:
       - "8888:8888"
     volumes:
-      - ./notebooks:/home/jovyan/work
-      - ./notebooks:/workspace
-    command: start-notebook.sh --NotebookApp.token='${JUPYTER_TOKEN}' --NotebookApp.password=''
+      - ./scripts:/home/jovyan/work
     env_file:
       - .env
+    environment: 
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    command: >
+      start-notebook.sh
+      --NotebookApp.token='${JUPYTER_TOKEN}'
+      --NotebookApp.password=''
+      --NotebookApp.allow_origin='*'
+      --NotebookApp.notebook_dir='/home/jovyan/work'
+      --NotebookApp.ip='0.0.0.0'
+      --NotebookApp.port=8888
+      --NotebookApp.open_browser=False
+    depends_on:
+      minio:
+        condition: service_healthy
     networks:
-    - proyecto1
+      - proyecto1
 
-  nessie: 
-    image: projectnessie/nessie:latest
-    container_name: nessie_catalog
+  nessie:
+    image: ghcr.io/projectnessie/nessie:0.99.0
+    container_name: nessie_1
+    env_file:
+      - .env
     environment:
       - nessie.version.store.type=IN_MEMORY
       - nessie.catalog.default-warehouse=warehouse
-      - nessie.catalog.warehouses.warehouse.location=s3://my-bucket/
+      - nessie.catalog.warehouses.warehouse.location=s3://${MINIO_DEFAULT_BUCKETS}/
       - nessie.catalog.service.s3.default-options.endpoint=http://minio:9000/
       - nessie.catalog.service.s3.default-options.access-key=urn:nessie-secret:quarkus:nessie.catalog.secrets.access-key
       - nessie.catalog.service.s3.default-options.path-style-access=true
       - nessie.catalog.service.s3.default-options.auth-type=STATIC
-      - nessie.catalog.secrets.access-key.name=admin
-      - nessie.catalog.secrets.access-key.secret=password
+      - nessie.catalog.secrets.access-key.name=${MINIO_USER}
+      - nessie.catalog.secrets.access-key.secret=${MINIO_PASSWORD}
       - nessie.catalog.service.s3.default-options.region=us-east-1
       - nessie.server.authentication.enabled=false
     ports:
       - "19120:19120"
+    depends_on:
+      minio:
+        condition: service_healthy
     networks:
-      - proyecto1 
+      - proyecto1
+   
 
   clickhouse:
-    image: clickhouse/clickhouse-server:latest
-    container_name: clickhouse
-    ports:
-      - "8123:8123"
-      - "9002:9000"
-    environment:
-      CLICKHOUSE_USER: default
-      CLICKHOUSE_PASSWORD: default
-    networks:
-      - proyecto1 
+      image: clickhouse/clickhouse-server:latest
+      container_name: clickhouse_1
+      ports:
+          - "9000:9000"
+          - "8123:8123"
+      volumes:
+        - clickhouse_data:/var/lib/clickhouse
+      environment:
+        - CLICKHOUSE_DB=grupo2_proyecto
+        - CLICKHOUSE_USER=default
+        - CLICKHOUSE_PASSWORD=default
+      networks:
+        - proyecto1
+      depends_on:
+        nessie:
+          condition: service_started
+        minio:
+          condition: service_healthy
 
-  
+volumes:
+  minio-data:
+  clickhouse_data:
+
 networks:
   proyecto1:

@@ -1,0 +1,26 @@
+# Ignore secrets and environment files with sensitive data
+secrets.toml
+.env
+
+# Ignore Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore Python cache and build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Ignore Docker-specific temporary files
+*.log
+*.tar
+
+# Do NOT ignore these (remove if present in .gitignore)
+!secrets_example.toml
+!env_example
