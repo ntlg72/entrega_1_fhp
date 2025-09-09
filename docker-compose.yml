@@ -85,10 +85,12 @@ services:
         - "9002:9000"
       volumes:
         - clickhouse_data:/var/lib/clickhouse
+      env_file:
+        - .env
       environment:
         - CLICKHOUSE_DB=default
-        - CLICKHOUSE_USER=admin
-        - CLICKHOUSE_PASSWORD=pass
+        - CLICKHOUSE_USER=${CLICKHOUSE_USER}
+        - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
       networks:
         - proyecto1
       depends_on:
