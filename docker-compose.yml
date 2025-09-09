@@ -81,7 +81,7 @@ services:
       image: clickhouse/clickhouse-server:latest
       container_name: clickhouse_1
       ports:
-          - "9000:9000"
+          - "9002:9000"
           - "8123:8123"
       volumes:
         - clickhouse_data:/var/lib/clickhouse
