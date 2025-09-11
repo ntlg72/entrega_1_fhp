@@ -59,7 +59,7 @@ services:
     environment:
       - nessie.version.store.type=IN_MEMORY
       - nessie.catalog.default-warehouse=warehouse
-      - nessie.catalog.warehouses.warehouse.location=s3://${MINIO_DEFAULT_BUCKETS}/
+      - nessie.catalog.warehouses.warehouse.location=s3://${MINIO_SECOND_BUCKETS}/
       - nessie.catalog.service.s3.default-options.endpoint=http://minio:9000/
       - nessie.catalog.service.s3.default-options.access-key=urn:nessie-secret:quarkus:nessie.catalog.secrets.access-key
       - nessie.catalog.service.s3.default-options.path-style-access=true
