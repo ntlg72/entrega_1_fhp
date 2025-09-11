@@ -1,6 +1,6 @@
 # Ignore secrets and environment files with sensitive data
 secrets.toml
-env
+.env
 
 # Ignore Jupyter notebook checkpoints
 .ipynb_checkpoints/
